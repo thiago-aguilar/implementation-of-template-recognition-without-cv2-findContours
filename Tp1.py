@@ -52,7 +52,7 @@ while(1):
         break
   
   
-# Close the window 
+### Close the window 
 cap.release() 
   
 # De-allocate any associated memory usage 
