@@ -54,6 +54,6 @@ while(1):
   
 ### Close the window 
 cap.release() 
-  
+#  
 # De-allocate any associated memory usage 
 cv2.destroyAllWindows() 
