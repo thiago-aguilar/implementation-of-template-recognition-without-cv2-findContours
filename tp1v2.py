@@ -50,10 +50,10 @@ while (1):
 
     # Display an original image
     cv2.imshow('Original', frame)
-
+    original=np.copy(frame)
     # finds edges in the input image image and
     # marks them in the output map edges
-    edges = cv2.Canny(frame, 100, 200)
+    edges = cv2.Canny(frame, 150, 200)
     frame[dst > 0.005 * dst.max()] = [0, 0, 255]
     quinas=[]
     pontos=[]
@@ -77,45 +77,19 @@ while (1):
                 contador=0
                 while sair==1:
                     contador=contador+1
-                    if lastx > x :
+                    if lastx<=x and lasty >=y :
                         if (np.array_equal(255, edges[y, x - 1])) and ((lastx != (x - 1)) or (lasty != y))and((lastlastx != (x - 1)) or (lastlasty != y)):
                             lastlastx = lastx
                             lastlasty = lasty
                             lastx = x
                             lasty= y
                             x = x - 1
-                        elif (np.array_equal(255, edges[y + 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y + 1)))and((lastlastx != (x - 1)) or (lastlasty != (y + 1))):
+                        elif (np.array_equal(255, edges[y - 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y - 1)))and((lastlastx != (x - 1)) or (lastlasty != (y - 1))):
                             lastlastx = lastx
                             lastlasty = lasty
                             lastx = x
                             lasty = y
                             x = x - 1
-                            y = y + 1
-                        elif (np.array_equal(255, edges[y+1, x])) and ((lastx != x) or (lasty != (y + 1)))and ((lastlastx != x) or (lastlasty != (y + 1))):
-                            lastlastx = lastx
-                            lastlasty = lasty
-                            lastx=x
-                            lasty = y
-                            y = y + 1
-                        elif (np.array_equal(255, edges[y + 1, x + 1])) and ((lastx != (x + 1)) or (lasty != (y + 1))) and ((lastlastx != (x + 1)) or (lastlasty != (y + 1))):
-                            lastlastx = lastx
-                            lastlasty = lasty
-                            lastx = x
-                            lasty = y
-                            x = x + 1
-                            y = y + 1
-                        elif (np.array_equal(255, edges[y, x+1 ])) and ((lastx != (x + 1)) or (lasty != y))and((lastlastx != (x + 1)) or (lastlasty != y)):
-                            lastlastx=lastx
-                            lastlasty=lasty
-                            lasty=y
-                            lastx = x
-                            x = x + 1
-                        elif (np.array_equal(255, edges[y-1, x+1])) and ((lastx != (x + 1)) or (lasty != (y - 1)))and((lastlastx != (x + 1)) or (lastlasty != (y - 1))):
-                            lastlastx = lastx
-                            lastlasty = lasty
-                            lastx = x
-                            lasty = y
-                            x = x + 1
                             y = y - 1
                         elif (np.array_equal(255, edges[y-1, x])) and ((lastx != x) or (lasty != (y - 1)))and((lastlastx != x) or (lastlasty != (y - 1))):
                             lastlastx = lastx
@@ -124,6 +98,87 @@ while (1):
                             lasty = y
                             x = x
                             y = y - 1
+                        elif (np.array_equal(255, edges[y-1, x+1])) and ((lastx != (x + 1)) or (lasty != (y - 1)))and((lastlastx != (x + 1)) or (lastlasty != (y - 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x + 1
+                            y = y - 1
+                        elif (np.array_equal(255, edges[y, x+1 ])) and ((lastx != (x + 1)) or (lasty != y))and((lastlastx != (x + 1)) or (lastlasty != y)):
+                            lastlastx=lastx
+                            lastlasty=lasty
+                            lasty=y
+                            lastx = x
+                            x = x + 1
+                        elif (np.array_equal(255, edges[y + 1, x + 1])) and ((lastx != (x + 1)) or (lasty != (y + 1))) and ((lastlastx != (x + 1)) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x + 1
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y+1, x])) and ((lastx != x) or (lasty != (y + 1)))and ((lastlastx != x) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx=x
+                            lasty = y
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y + 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y + 1)))and((lastlastx != (x - 1)) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x - 1
+                            y = y + 1
+
+                    elif lastx<=x and lasty <y :
+                        if (np.array_equal(255, edges[y-1, x])) and ((lastx != x) or (lasty != (y - 1)))and((lastlastx != x) or (lastlasty != (y - 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x
+                            y = y - 1
+                        elif (np.array_equal(255, edges[y-1, x+1])) and ((lastx != (x + 1)) or (lasty != (y - 1)))and((lastlastx != (x + 1)) or (lastlasty != (y - 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x + 1
+                            y = y - 1
+                        elif (np.array_equal(255, edges[y, x+1 ])) and ((lastx != (x + 1)) or (lasty != y))and((lastlastx != (x + 1)) or (lastlasty != y)):
+                            lastlastx=lastx
+                            lastlasty=lasty
+                            lasty=y
+                            lastx = x
+                            x = x + 1
+                        elif (np.array_equal(255, edges[y + 1, x + 1])) and ((lastx != (x + 1)) or (lasty != (y + 1))) and ((lastlastx != (x + 1)) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x + 1
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y+1, x])) and ((lastx != x) or (lasty != (y + 1)))and ((lastlastx != x) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx=x
+                            lasty = y
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y + 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y + 1)))and((lastlastx != (x - 1)) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x - 1
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y, x - 1])) and ((lastx != (x - 1)) or (lasty != y))and((lastlastx != (x - 1)) or (lastlasty != y)):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty= y
+                            x = x - 1
                         elif (np.array_equal(255, edges[y - 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y - 1)))and((lastlastx != (x - 1)) or (lastlasty != (y - 1))):
                             lastlastx = lastx
                             lastlasty = lasty
@@ -132,7 +187,62 @@ while (1):
                             x = x - 1
                             y = y - 1
 
-                    else :
+                    elif lastx>x and lasty>=y :
+                        if (np.array_equal(255, edges[y+1, x])) and ((lastx != x) or (lasty != (y + 1)))and ((lastlastx != x) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx=x
+                            lasty = y
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y + 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y + 1)))and((lastlastx != (x - 1)) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x - 1
+                            y = y + 1
+                        elif (np.array_equal(255, edges[y, x - 1])) and ((lastx != (x - 1)) or (lasty != y))and((lastlastx != (x - 1)) or (lastlasty != y)):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty= y
+                            x = x - 1
+                        elif (np.array_equal(255, edges[y - 1, x - 1])) and ((lastx != (x - 1)) or (lasty != (y - 1)))and((lastlastx != (x - 1)) or (lastlasty != (y - 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x - 1
+                            y = y - 1
+                        elif (np.array_equal(255, edges[y-1, x])) and ((lastx != x) or (lasty != (y - 1)))and((lastlastx != x) or (lastlasty != (y - 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x
+                            y = y - 1
+                        elif (np.array_equal(255, edges[y-1, x+1])) and ((lastx != (x + 1)) or (lasty != (y - 1)))and((lastlastx != (x + 1)) or (lastlasty != (y - 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x + 1
+                            y = y - 1
+                        elif (np.array_equal(255, edges[y, x+1 ])) and ((lastx != (x + 1)) or (lasty != y))and((lastlastx != (x + 1)) or (lastlasty != y)):
+                            lastlastx=lastx
+                            lastlasty=lasty
+                            lasty=y
+                            lastx = x
+                            x = x + 1
+                        elif (np.array_equal(255, edges[y + 1, x + 1])) and ((lastx != (x + 1)) or (lasty != (y + 1))) and ((lastlastx != (x + 1)) or (lastlasty != (y + 1))):
+                            lastlastx = lastx
+                            lastlasty = lasty
+                            lastx = x
+                            lasty = y
+                            x = x + 1
+                            y = y + 1
+
+                    elif lastx>=x and lasty<y :
                         if (np.array_equal(255, edges[y, x+1 ])) and ((lastx != (x + 1)) or (lasty != y))and((lastlastx != (x + 1)) or (lastlasty != y)):
                             lastlastx=lastx
                             lastlasty=lasty
@@ -200,12 +310,11 @@ while (1):
                     if [y, x] in pontos:
                         #contaQuinas=0
                         sair=0
-                    if contaQuinas==6:
-                        contaQuinas=0
-                        break
+
                     pontos.append([y, x]) #
                 if contaQuinas>=4 and [y,x] in pontos :
                     homografias.append(quinas)
+
                 quinas=[]
                 sair=1
 
@@ -214,8 +323,8 @@ while (1):
        # value1=i
         aux1=np.array([[i[0][1],i[0][0]],[i[1][1],i[1][0]],[i[2][1],i[2][0]],[i[3][1],i[3][0]]])
         aux2=np.array([[0,0],[0,tamXimg],[tamYimg,tamXimg],[tamYimg,0]])
-        h, status = cv2.findHomography(aux1, aux2)
-        im_dst = cv2.warpPerspective(frame, h, (tamYimg, tamXimg))
+        h, status = cv2.findHomography(aux1, aux2, cv2.RANSAC,5)
+        im_dst = cv2.warpPerspective(original, h, (tamYimg, tamXimg))
         cv2.imshow('HOMOGRAFIA', im_dst)
 
         # value1 = homografias[0]
