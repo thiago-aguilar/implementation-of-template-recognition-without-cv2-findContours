@@ -3,9 +3,36 @@ import numpy as np
 from matplotlib import pyplot as plt
 import math
 
-img = cv2.imread('alvo.jpg', 0)
+import numpy as np
 
+def rotateImage(image, angleInDegrees):
+    h, w = image.shape[:2]
+    img_c = (w / 2, h / 2)
+
+    rot = cv2.getRotationMatrix2D(img_c, angleInDegrees, 1)
+
+    rad = math.radians(angleInDegrees)
+    sin = math.sin(rad)
+    cos = math.cos(rad)
+    b_w = int((h * abs(sin)) + (w * abs(cos)))
+    b_h = int((h * abs(cos)) + (w * abs(sin)))
+
+    rot[0, 2] += ((b_w / 2) - img_c[0])
+    rot[1, 2] += ((b_h / 2) - img_c[1])
+
+    outImg = cv2.warpAffine(image, rot, (b_w, b_h), flags=cv2.INTER_LINEAR)
+    return outImg
+
+img = cv2.imread('alvo.jpg', 0)
+alvo1=np.copy(img)
+alvo2= rotateImage(alvo1,90)
+alvo3= rotateImage(alvo2,90)
+alvo4= rotateImage(alvo3,90)
 cv2.imshow('image', img)
+cv2.imshow('alvo1', alvo1)
+cv2.imshow('alvo2', alvo2)
+cv2.imshow('alvo3', alvo3)
+cv2.imshow('alvo4', alvo4)
 imgplot = plt.imshow(img)
 
 # capture frames from a camera
@@ -327,7 +354,7 @@ while (1):
         h, status = cv2.findHomography(aux1, aux2, cv2.RANSAC,5)
         im_dst = cv2.warpPerspective(original, h, (tamYimg, tamXimg))
         cv2.imshow('HOMOGRAFIA', im_dst)
-
+#
         # value1 = homografias[0]
         # teste1 = np.array([value1])
         # teste2 = np.array([[0,0],[0,tamYimg],[tamXimg,tamYimg],[tamXimg,0]])
