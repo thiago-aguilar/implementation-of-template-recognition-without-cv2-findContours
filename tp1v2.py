@@ -311,7 +311,7 @@ while (1):
                         #contaQuinas=0
                         sair=0
 
-                    pontos.append([y, x]) #
+                    pontos.append([y,x]) #
                 if contaQuinas>=4 and [y,x] in pontos :
                     homografias.append(quinas)
 
@@ -321,7 +321,8 @@ while (1):
     #HOMOGRAFIA------------------------------------------
     for i in homografias:
        # value1=i
-        aux1=np.array([[i[0][1],i[0][0]],[i[1][1],i[1][0]],[i[2][1],i[2][0]],[i[3][1],i[3][0]]])
+        #aux1=np.array([[i[0][1],i[0][0]],[i[1][1],i[1][0]],[i[2][1],i[2][0]],[i[3][1],i[3][0]]])
+        aux1 = np.array([[i[0][1], i[0][0]],[i[3][1], i[3][0]], [i[2][1], i[2][0]], [i[1][1], i[1][0]] ])
         aux2=np.array([[0,0],[0,tamXimg],[tamYimg,tamXimg],[tamYimg,0]])
         h, status = cv2.findHomography(aux1, aux2, cv2.RANSAC,5)
         im_dst = cv2.warpPerspective(original, h, (tamYimg, tamXimg))
