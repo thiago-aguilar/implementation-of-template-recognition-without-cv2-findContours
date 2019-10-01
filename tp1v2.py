@@ -8,17 +8,23 @@ import numpy as np
 
 videoFinal=[]
 
-def mse(imageA, imageB):
-    # the 'Mean Squared Error' between the two images is the
-    # sum of the squared difference between the two images;
-    # NOTE: the two images must have the same dimension
+def compara1(imageA, imageB):
+    # implementando metodo meanSquaredError
     err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
     err /= float(imageA.shape[0] * imageA.shape[1])
 
-    # return the MSE, the lower the error, the more "similar"
-    # the two images are
     return err
 
+def  compara2(imageA, imageB):
+    #implementando metodo CCORR
+
+    numerador = np.sum((imageA.astype("float") * imageB.astype("float")))
+    denominador1 = np.sum ( imageA.astype("float")**2)
+    denominador2 = np.sum ( imageB.astype("float")**2)
+    denominador = math.sqrt(denominador1*denominador2)
+    err=numerador/denominador
+    # err = numerador
+    return err
 
 def rotateImage(image, angleInDegrees):
     h, w = image.shape[:2]
@@ -38,8 +44,13 @@ def rotateImage(image, angleInDegrees):
     outImg = cv2.warpAffine(image, rot, (b_w, b_h), flags=cv2.INTER_LINEAR)
     return outImg
 
-img = cv2.imread('alvo.jpg', 0)
 
+
+
+
+
+img = cv2.imread('alvo.jpg', 0)
+METODO= 1       #0 PARA MeanSquaredError | 1 para CCORR
 #cv2.imshow('image', img)
 crop_img = img[:, 3:-4]
 #cv2.imshow("cropped", crop_img)
@@ -106,8 +117,8 @@ while (1):
     original = cv2.cvtColor(original, cv2.COLOR_BGR2GRAY)
     # finds edges in the input image image and
     # marks them in the output map edges
-    edges = cv2.Canny(frame, 130,220)
-    frame[dst > 0.001 * dst.max()] = [0, 0, 255]
+    edges = cv2.Canny(frame, 150,250)
+    frame[dst > 0.0005 * dst.max()] = [0, 0, 255]
     quinas=[]
     pontos=[]
     contaQuinas=0
@@ -379,32 +390,60 @@ while (1):
         aux2=np.array([[0,0],[0,tamXimg],[tamYimg,tamXimg],[tamYimg,0]])
         h, status = cv2.findHomography(aux1, aux2)
         im_dst = cv2.warpPerspective(original, h, (tamYimg, tamXimg))
-        # cv2.imshow('HOMOGRAFIA', im_dst)
-        erro1 = mse(im_dst, alvo1)
-        erro2 = mse(im_dst, alvo2)
-        erro3 = mse(im_dst, alvo3)
-        erro4 = mse(im_dst, alvo4)
+        cv2.imshow('HOMOGRAFIA', im_dst)
 
-        if erro1 <= 12000:
-            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 0, 0), 2)
-            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 255, 0), 2)
-            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 0, 255), 2)
-            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 255, 0), 2)
-        if erro2<=12000:
-            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 255, 0), 2)
-            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 0, 0), 2)
-            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 255, 0), 2)
-            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 0 , 255), 2)
-        if erro3<=12000:
-            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 0, 255), 2)
-            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 255, 0), 2)
-            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 0, 0), 2)
-            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 255, 0), 2)
-        if  erro4<=12000:
-            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 255, 0), 2)
-            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 0, 255), 2)
-            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 255, 0), 2)
-            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 0 , 0), 2)
+        if METODO == 0:
+            erro1 = compara1(im_dst, alvo1)
+            erro2 = compara1(im_dst, alvo2)
+            erro3 = compara1(im_dst, alvo3)
+            erro4 = compara1(im_dst, alvo4)
+
+            if erro1 <= 12000:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 0, 0), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 255, 0), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 0, 255), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 255, 0), 2)
+            if erro2<=12000:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 255, 0), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 0, 0), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 255, 0), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 0 , 255), 2)
+            if erro3<=12000:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 0, 255), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 255, 0), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 0, 0), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 255, 0), 2)
+            if  erro4<=12000:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 255, 0), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 0, 255), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 255, 0), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 0 , 0), 2)
+        else :
+            erro1 = compara2(im_dst, alvo1)
+            erro2 = compara2(im_dst, alvo2)
+            erro3 = compara2(im_dst, alvo3)
+            erro4 = compara2(im_dst, alvo4)
+
+            if erro1 >= 0.75:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 0, 0), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 255, 0), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 0, 255), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 255, 0), 2)
+            if erro2 >= 0.75:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 255, 0), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 0, 0), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 255, 0), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 0, 255), 2)
+            if erro3 >= 0.75:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 0, 255), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 255, 0), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 0, 0), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 255, 0), 2)
+            if erro4 >= 0.75:
+                final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 255, 0), 2)
+                final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 0, 255), 2)
+                final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 255, 0), 2)
+                final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 0, 0), 2)
     cv2.imshow('FINAL',final)
     out.write(final)
     # Display edges in a frame
