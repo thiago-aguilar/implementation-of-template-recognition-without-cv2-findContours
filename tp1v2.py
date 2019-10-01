@@ -5,6 +5,21 @@ import math
 
 import numpy as np
 
+
+videoFinal=[]
+
+def mse(imageA, imageB):
+    # the 'Mean Squared Error' between the two images is the
+    # sum of the squared difference between the two images;
+    # NOTE: the two images must have the same dimension
+    err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
+    err /= float(imageA.shape[0] * imageA.shape[1])
+
+    # return the MSE, the lower the error, the more "similar"
+    # the two images are
+    return err
+
+
 def rotateImage(image, angleInDegrees):
     h, w = image.shape[:2]
     img_c = (w / 2, h / 2)
@@ -24,22 +39,30 @@ def rotateImage(image, angleInDegrees):
     return outImg
 
 img = cv2.imread('alvo.jpg', 0)
-alvo1=np.copy(img)
+
+#cv2.imshow('image', img)
+crop_img = img[:, 3:-4]
+#cv2.imshow("cropped", crop_img)
+alvo1=np.copy(crop_img)
 alvo2= rotateImage(alvo1,90)
 alvo3= rotateImage(alvo2,90)
 alvo4= rotateImage(alvo3,90)
-cv2.imshow('image', img)
-cv2.imshow('alvo1', alvo1)
-cv2.imshow('alvo2', alvo2)
-cv2.imshow('alvo3', alvo3)
-cv2.imshow('alvo4', alvo4)
-imgplot = plt.imshow(img)
+# cv2.imshow('alvo1', alvo1)
+# cv2.imshow('alvo2', alvo2)
+# cv2.imshow('alvo3', alvo3)
+# cv2.imshow('alvo4', alvo4)
+# imgplot = plt.imshow(img)
 
 # capture frames from a camera
 cap = cv2.VideoCapture('entrada.avi')
+frame_width = int(cap.get(3))
+frame_height = int(cap.get(4))
 
-tamXimg = img.shape[1]
-tamYimg = img.shape[0]
+# Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
+out = cv2.VideoWriter('outpy.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30 , (frame_width, frame_height))
+
+tamXimg = alvo1.shape[1]
+tamYimg = alvo1.shape[0]
 witdh = cap.get(3)  # float
 height = cap.get(4)  # float
 rows = math.floor(height)  # transforma em int
@@ -52,6 +75,7 @@ while (1):
 
     # reads frames from a camera
     ret, frame = cap.read()
+    if not ret: break
     # scale_percent = 100  # percent of original size
     # width = int(frames.shape[1] * scale_percent / 100)
     # height = int(frames.shape[0] * scale_percent / 100)
@@ -76,12 +100,14 @@ while (1):
  #   res = cv2.bitwise_and(frame, frame, mask=mask)
 
     # Display an original image
-    cv2.imshow('Original', frame)
+    # cv2.imshow('Original', frame)
     original=np.copy(frame)
+    final=np.copy(original)
+    original = cv2.cvtColor(original, cv2.COLOR_BGR2GRAY)
     # finds edges in the input image image and
     # marks them in the output map edges
-    edges = cv2.Canny(frame, 150, 200)
-    frame[dst > 0.005 * dst.max()] = [0, 0, 255]
+    edges = cv2.Canny(frame, 130,220)
+    frame[dst > 0.001 * dst.max()] = [0, 0, 255]
     quinas=[]
     pontos=[]
     contaQuinas=0
@@ -92,7 +118,7 @@ while (1):
             if (np.array_equal(255, edges[j, i])) and np.array_equal([0,0,255], frame[j, i]): #verifica se chegou em pixel que é borda e quina
                 x=i
                 y=j
-                cv2.imshow('Corners', frame)
+                # cv2.imshow('Corners', frame)
                 lastx=0
                 lasty=0
                 lastlastx=-1
@@ -325,7 +351,7 @@ while (1):
                             y = y - 1
                     if (x!= i or y != j) and  np.array_equal([0,0,255], frame[y, x]) and contador>20:
                         contaQuinas=contaQuinas+1
-                        cv2.imshow('Corners', frame)
+                        # cv2.imshow('Corners', frame)
                         quinas.append([y,x])
                         contador=0
                     if x==i and y==j:
@@ -351,20 +377,39 @@ while (1):
         #aux1=np.array([[i[0][1],i[0][0]],[i[1][1],i[1][0]],[i[2][1],i[2][0]],[i[3][1],i[3][0]]])
         aux1 = np.array([[i[0][1], i[0][0]],[i[3][1], i[3][0]], [i[2][1], i[2][0]], [i[1][1], i[1][0]] ])
         aux2=np.array([[0,0],[0,tamXimg],[tamYimg,tamXimg],[tamYimg,0]])
-        h, status = cv2.findHomography(aux1, aux2, cv2.RANSAC,5)
+        h, status = cv2.findHomography(aux1, aux2)
         im_dst = cv2.warpPerspective(original, h, (tamYimg, tamXimg))
-        cv2.imshow('HOMOGRAFIA', im_dst)
-#
-        # value1 = homografias[0]
-        # teste1 = np.array([value1])
-        # teste2 = np.array([[0,0],[0,tamYimg],[tamXimg,tamYimg],[tamXimg,0]])
-        # h, status = cv2.findHomography(teste1,teste2)
-        # im_dst = cv2.warpPerspective( frame , h, (tamXimg,tamYimg))
+        # cv2.imshow('HOMOGRAFIA', im_dst)
+        erro1 = mse(im_dst, alvo1)
+        erro2 = mse(im_dst, alvo2)
+        erro3 = mse(im_dst, alvo3)
+        erro4 = mse(im_dst, alvo4)
 
-
+        if erro1 <= 12000:
+            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 0, 0), 2)
+            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 255, 0), 2)
+            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 0, 255), 2)
+            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 255, 0), 2)
+        if erro2<=12000:
+            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (255, 255, 0), 2)
+            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 0, 0), 2)
+            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (0, 255, 0), 2)
+            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 0 , 255), 2)
+        if erro3<=12000:
+            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 0, 255), 2)
+            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (255, 255, 0), 2)
+            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 0, 0), 2)
+            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (0, 255, 0), 2)
+        if  erro4<=12000:
+            final = cv2.line(final, (i[0][1], i[0][0]), (i[3][1], i[3][0]), (0, 255, 0), 2)
+            final = cv2.line(final, (i[3][1], i[3][0]), (i[2][1], i[2][0]), (0, 0, 255), 2)
+            final = cv2.line(final, (i[2][1], i[2][0]), (i[1][1], i[1][0]), (255, 255, 0), 2)
+            final = cv2.line(final, (i[1][1], i[1][0]), (i[0][1], i[0][0]), (255, 0 , 0), 2)
+    cv2.imshow('FINAL',final)
+    out.write(final)
     # Display edges in a frame
-    cv2.imshow('Edges', edges)
-    cv2.imshow('Corners', frame)
+   # cv2.imshow('Edges', edges)
+    #cv2.imshow('Corners', frame)
     # Wait for Esc key to stop
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
@@ -372,6 +417,8 @@ while (1):
 
 ### Close the window
 cap.release()
+out.release()
+
 #
 # De-allocate any associated memory usage
 cv2.destroyAllWindows()
